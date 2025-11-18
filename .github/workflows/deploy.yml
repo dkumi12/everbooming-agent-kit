@@ -16,16 +16,18 @@ jobs:
 
       - name: Setup SSH
         run: |
-          mkdir -p ~/.ssh
-          # Write key using printf to avoid newline issues
-          printf '%s\n' "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          mkdir -p /home/runner/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > /home/runner/.ssh/id_rsa
+          chmod 600 /home/runner/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> /home/runner/.ssh/known_hosts
 
       - name: Deploy
         run: |
-          scp -r ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/deploy/
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd ~/deploy && docker-compose down && docker-compose up -d --build"
+          scp -r -i /home/runner/.ssh/id_rsa ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/deploy/
+          ssh -i /home/runner/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd ~/deploy && docker stop agent-kit || true"
+          ssh -i /home/runner/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd ~/deploy && docker rm agent-kit || true"
+          ssh -i /home/runner/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd ~/deploy && docker build -t agent-kit ."
+          ssh -i /home/runner/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd ~/deploy && docker run -d --name agent-kit -p 8501:8501 agent-kit"
 
       - name: Success
         run: echo "🚀 Deployment completed!"
