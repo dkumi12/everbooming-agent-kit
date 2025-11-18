@@ -1,47 +1,32 @@
 import boto3
 import json
-from pathlib import Path
+from botocore.config import Config
 
-# Ensure outputs folder exists
-Path("outputs").mkdir(exist_ok=True)
-
-bedrock = boto3.client(
-    service_name="bedrock-runtime",
-    region_name="us-east-1"
+# Increase timeouts for large models
+config = Config(
+    read_timeout=180,         # from 60 → 180 seconds
+    connect_timeout=10,
+    retries={'max_attempts': 3}
 )
 
-def load_prompt(path):
-    return Path(path).read_text()
-
-def save_output(filename, content):
-    Path(f"outputs/{filename}").write_text(content, encoding="utf-8")
+bedrock = boto3.client(
+    "bedrock-runtime",
+    region_name="us-east-1",
+    config=config
+)
 
 def generate_response(prompt, model):
-    """
-    AWS OpenAI-Compatible GPT-OSS Format (Chat Completions)
-    {
-        "messages": [{ "role": "user", "content": "..." }],
-        "max_tokens": 2048,
-        "temperature": 0.3
-    }
-    """
-
     body = {
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "max_tokens": 2048,
+        "input_text": prompt,
+        "model": model,
+        "max_tokens": 4000,
         "temperature": 0.3
     }
 
     response = bedrock.invoke_model(
         modelId=model,
-        body=json.dumps(body),
-        accept="application/json",
-        contentType="application/json"
+        body=json.dumps(body)
     )
 
-    data = json.loads(response["body"].read())
-
-    # Return the chat message content
-    return data["choices"][0]["message"]["content"]
+    output = json.loads(response["body"].read())
+    return output["output_text"]
