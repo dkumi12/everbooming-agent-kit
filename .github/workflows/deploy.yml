@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout Source Code
         uses: actions/checkout@v3
 
@@ -19,28 +20,30 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-          cat > ~/.ssh/config <<CONFIG
+          cat > ~/.ssh/config <<EOF
 Host ec2
   HostName ${{ secrets.EC2_HOST }}
   User ${{ secrets.EC2_USER }}
   IdentityFile ~/.ssh/id_rsa
   StrictHostKeyChecking no
-CONFIG
+EOF
 
       - name: Upload Project Files to EC2
         run: |
-          ssh ec2 "mkdir -p ~/deploy"
           rsync -avz --delete --exclude 'venv' ./ ec2:~/deploy/
 
       - name: Build & Restart Docker Container on EC2
         run: |
-          ssh ec2 << 'REMOTE'
+          ssh ec2 << 'EOF'
             cd ~/deploy
+
             docker stop agent-kit || true
             docker rm agent-kit || true
+
             docker build -t agent-kit .
+
             docker run -d --name agent-kit -p 8501:8501 agent-kit
-REMOTE
+EOF
 
       - name: Deployment Complete
         run: echo "🚀 Deployment successful!"
