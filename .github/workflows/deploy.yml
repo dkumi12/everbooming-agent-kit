@@ -1,5 +1,3 @@
-name: Deploy Agent Kit to EC2
-
 on:
   push:
     branches:
@@ -19,18 +17,19 @@ jobs:
         echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
 
-        cat >> ~/.ssh/config <<EOF
-        Host ec2
-          HostName ${{ secrets.EC2_HOST }}
-          User ${{ secrets.EC2_USER }}
-          IdentityFile ~/.ssh/id_rsa
-          StrictHostKeyChecking no
-        EOF
+        # Write clean SSH config (NO extra spaces)
+        cat > ~/.ssh/config <<EOF
+Host ec2
+  HostName ${{ secrets.EC2_HOST }}
+  User ${{ secrets.EC2_USER }}
+  IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
+EOF
 
     - name: Copy project to EC2
       run: |
-        ssh ec2 "rm -rf ~/deploy/*"
-        scp -r * ec2:~/deploy/
+        ssh ec2 "rm -rf ~/deploy/* || true"
+        scp -r . ec2:~/deploy/
 
     - name: Build & Restart Docker Container on EC2
       run: |
@@ -46,7 +45,7 @@ jobs:
 
           echo "Running new container..."
           docker run -d --name agent-kit -p 8501:8501 agent-kit
-        EOF
+EOF
 
     - name: Deployment Complete
       run: echo "🎉 Deployment finished successfully!"
