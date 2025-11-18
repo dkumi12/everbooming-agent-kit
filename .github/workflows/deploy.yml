@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production  # ← Make sure this matches your environment name
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -17,17 +19,29 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          echo "Host ${{ secrets.EC2_HOST }}" >> ~/.ssh/config
-          echo "  User ${{ secrets.EC2_USER }}" >> ~/.ssh/config
-          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          
+          cat > ~/.ssh/config << EOF
+Host ec2
+  HostName ${{ secrets.EC2_HOST }}
+  User ${{ secrets.EC2_USER }}
+  IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
+EOF
+          chmod 600 ~/.ssh/config
 
-      - name: Deploy to EC2
+      - name: Test Connection
+        run: ssh -o ConnectTimeout=10 ec2 "echo 'Connected successfully!'"
+
+      - name: Deploy Files
+        run: rsync -avz --exclude 'venv' ./ ec2:~/deploy/
+
+      - name: Build and Deploy Container
         run: |
-          scp -r ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/deploy/
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
-            cd ~/deploy
-            docker stop agent-kit || true
-            docker rm agent-kit || true  
-            docker build -t agent-kit .
-            docker run -d --name agent-kit -p 8501:8501 agent-kit
-          "
+          ssh ec2 "cd ~/deploy && \
+          docker stop agent-kit || true && \
+          docker rm agent-kit || true && \
+          docker build -t agent-kit . && \
+          docker run -d --name agent-kit -p 8501:8501 agent-kit"
+
+      - name: Success
+        run: echo "🚀 Deployment completed!"
