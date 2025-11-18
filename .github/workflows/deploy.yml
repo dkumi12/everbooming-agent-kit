@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production  # ← Make sure this matches your environment name
+    environment: production
 
     steps:
       - name: Checkout Code
@@ -20,7 +20,7 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
-          cat > ~/.ssh/config << EOF
+          cat > ~/.ssh/config << 'EOF'
 Host ec2
   HostName ${{ secrets.EC2_HOST }}
   User ${{ secrets.EC2_USER }}
