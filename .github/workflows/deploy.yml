@@ -1,46 +1,13 @@
-name: Deploy to EC2
+name: Test Action
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Configure SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-          cat > ~/.ssh/config << 'EOF'
-Host ec2
-  HostName ${{ secrets.EC2_HOST }}
-  User ${{ secrets.EC2_USER }}
-  IdentityFile ~/.ssh/id_rsa
-  StrictHostKeyChecking no
-EOF
-
-      - name: Upload project to EC2
-        run: |
-          ssh ec2 "rm -rf ~/deploy || true && mkdir -p ~/deploy"
-          scp -r . ec2:~/deploy/
-
-      - name: Build & Restart Docker container
-        run: |
-          ssh ec2 << 'EOF'
-            cd ~/deploy
-            docker stop agent-kit || true
-            docker rm agent-kit || true
-            
-            docker build -t agent-kit .
-            docker run -d --name agent-kit -p 8501:8501 agent-kit
-EOF
-
-      - name: Deployment Complete
-        run: echo "🎉 Deployment finished successfully!"
+      - name: Say Hello
+        run: echo "YAML is working 🎉"
