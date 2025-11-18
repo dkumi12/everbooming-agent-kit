@@ -14,30 +14,46 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Say Hello World
-        run: echo "Hello World - if this fails, we have BIG problems"
+      # ---------------------------------------------------------
+      # NEW STEP: Copy files from GitHub Runner to EC2
+      # ---------------------------------------------------------
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "." # Copy everything from current runner dir
+          target: "~/deploy" # Paste it into this folder on EC2
+          rm: true # Optional: Delete old files in target before copying
 
-      - name: List Files
-        run: ls -la
-
-      - name: Try Making Temp Dir
-        run: |
-          mkdir -p /tmp/test123
-          echo "Made directory successfully"
-          ls -la /tmp/
-
+      # ---------------------------------------------------------
+      # EXECUTE: Now we SSH in and run Docker
+      # ---------------------------------------------------------
       - name: Deploy using SSH Action
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true # CRITICAL: Fails the action if any command inside fails
           script: |
+            # Ensure we are in the directory where we just copied the files
             cd ~/deploy
+            
+            # Create env file if needed (Optional, remove if not used)
+            # echo "PORT=8501" > .env
+            
+            # Stop and Remove existing container
             docker stop agent-kit || true
             docker rm agent-kit || true
+            
+            # Build and Run
             docker build -t agent-kit .
-            docker run -d --name agent-kit -p 8501:8501 agent-kit
+            docker run -d --restart unless-stopped --name agent-kit -p 8501:8501 agent-kit
+            
+            # Cleanup unused images to save space on EC2
+            docker image prune -f
 
       - name: Success
         run: echo "🚀 Finally worked!"
