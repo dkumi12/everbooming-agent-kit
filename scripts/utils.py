@@ -1,32 +1,73 @@
-import boto3
+import os
 import json
-from botocore.config import Config
+import boto3
 
-# Increase timeouts for large models
-config = Config(
-    read_timeout=180,         # from 60 → 180 seconds
-    connect_timeout=10,
-    retries={'max_attempts': 3}
-)
 
-bedrock = boto3.client(
-    "bedrock-runtime",
-    region_name="us-east-1",
-    config=config
-)
+# ---------------------------------------------------------
+#  PROMPT LOADER
+# ---------------------------------------------------------
+def load_prompt(file_name: str) -> str:
+    """
+    Loads a prompt template from the /prompts directory.
+    """
+    path = os.path.join("prompts", file_name)
 
-def generate_response(prompt, model):
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Prompt file not found: {path}")
+
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+# ---------------------------------------------------------
+#  OUTPUT SAVER
+# ---------------------------------------------------------
+def save_output(name: str, content: str):
+    """
+    Saves the agent output into /outputs/<name>.md.
+    """
+    os.makedirs("outputs", exist_ok=True)
+
+    output_path = os.path.join("outputs", f"{name}.md")
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+
+# ---------------------------------------------------------
+#  AWS BEDROCK CLIENT
+# ---------------------------------------------------------
+bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
+
+
+# ---------------------------------------------------------
+#  MODEL INVOCATION
+# ---------------------------------------------------------
+def generate_response(prompt: str, model: str):
+    """
+    Sends a prompt to AWS Bedrock's OpenAI gpt-oss-* model
+    using the new "messages" API format.
+    """
+
     body = {
-        "input_text": prompt,
         "model": model,
-        "max_tokens": 4000,
-        "temperature": 0.3
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.7,
+        "max_tokens": 2048
     }
 
     response = bedrock.invoke_model(
+        body=json.dumps(body),
         modelId=model,
-        body=json.dumps(body)
+        accept="application/json",
+        contentType="application/json"
     )
 
-    output = json.loads(response["body"].read())
-    return output["output_text"]
+    result = json.loads(response["body"].read())
+
+    # New OpenAI-style OSS response format
+    try:
+        return result["choices"][0]["message"]["content"]
+    except Exception as e:
+        raise ValueError(f"Unexpected response format: {result}") from e
