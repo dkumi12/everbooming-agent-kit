@@ -14,33 +14,30 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Check Current Directory
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "Home directory: $HOME"
-          whoami
-          ls -la
+      - name: Say Hello World
+        run: echo "Hello World - if this fails, we have BIG problems"
 
-      - name: Try Creating SSH Directory
-        run: |
-          echo "Attempting to create SSH directory..."
-          mkdir -v -p ~/.ssh
-          echo "Exit code: $?"
-          ls -la ~/
+      - name: List Files
+        run: ls -la
 
-      - name: Continue if successful
-        if: success()
+      - name: Try Making Temp Dir
         run: |
-          echo "SSH directory created successfully!"
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          mkdir -p /tmp/test123
+          echo "Made directory successfully"
+          ls -la /tmp/
 
-      - name: Deploy
-        if: success()
-        run: |
-          scp -r ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/deploy/
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd ~/deploy && docker stop agent-kit || true; docker rm agent-kit || true; docker build -t agent-kit .; docker run -d --name agent-kit -p 8501:8501 agent-kit"
+      - name: Deploy using SSH Action
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/deploy
+            docker stop agent-kit || true
+            docker rm agent-kit || true
+            docker build -t agent-kit .
+            docker run -d --name agent-kit -p 8501:8501 agent-kit
 
       - name: Success
-        run: echo "🚀 Deployment completed!"
+        run: echo "🚀 Finally worked!"
