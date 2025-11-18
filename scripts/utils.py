@@ -8,7 +8,7 @@ from botocore.config import Config
 # ---------------------------------------------------------
 
 bedrock_config = Config(
-    read_timeout=180,          # Allow OSS 20B warm-up
+    read_timeout=180,      # OSS 20B needs warm-up time
     connect_timeout=10,
     retries={"max_attempts": 3}
 )
@@ -24,9 +24,8 @@ bedrock = boto3.client(
 # ---------------------------------------------------------
 
 def load_prompt(filename: str) -> str:
-    """Load prompt templates from /prompts folder."""
     path = os.path.join("prompts", filename)
-
+    
     if not os.path.exists(path):
         raise FileNotFoundError(f"Prompt file not found: {path}")
 
@@ -35,7 +34,6 @@ def load_prompt(filename: str) -> str:
 
 
 def save_output(name: str, content: str):
-    """Save output in /outputs folder."""
     os.makedirs("outputs", exist_ok=True)
     path = os.path.join("outputs", f"{name}.md")
 
@@ -44,21 +42,18 @@ def save_output(name: str, content: str):
 
 
 # ---------------------------------------------------------
-#  MODEL CALL (OSS MODELS)
+#    OSS MODEL CALL  (CORRECT FORMAT)
 # ---------------------------------------------------------
 
 def generate_response(prompt: str, model: str):
     """
-    Invoke OSS OpenAI models on AWS Bedrock using the
-    updated 'messages' format.
+    OSS MODELS **DO NOT USE messages[]**
+    They require { "text": ... }
     """
 
     payload = {
-        "model": model,
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "max_tokens": 2000,
+        "text": prompt,            # <-- FIX: OSS uses simple text
+        "max_tokens": 4000,
         "temperature": 0.3
     }
 
@@ -71,8 +66,12 @@ def generate_response(prompt: str, model: str):
 
     data = json.loads(response["body"].read())
 
-    # Ensure compatible with OSS output format
-    try:
-        return data["choices"][0]["message"]["content"]
-    except Exception as e:
-        raise ValueError(f"Unexpected OSS model output format: {data}") from e
+    # OSS returns:  { "output_text": "..." }
+    if "output_text" in data:
+        return data["output_text"]
+
+    # Fallback for variations
+    if "completion" in data:
+        return data["completion"]
+
+    raise ValueError(f"Unexpected OSS output format: {data}")
