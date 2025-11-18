@@ -7,32 +7,27 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-22.04  # Try different runner
+    runs-on: ubuntu-latest
     environment: production
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Setup SSH
+      - name: Setup SSH in Workspace
         run: |
-          whoami
-          pwd
-          ls -la /home/runner/
-          mkdir -p ~/.ssh
-          echo "SSH directory created"
+          mkdir -p ./ssh_temp
+          echo "${{ secrets.EC2_SSH_KEY }}" > ./ssh_temp/id_rsa
+          chmod 600 ./ssh_temp/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ./ssh_temp/known_hosts
 
-      - name: Create SSH Key
+      - name: Deploy using Temp Key
         run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          echo "SSH key created"
-
-      - name: Continue Deployment
-        run: |
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-          scp -r ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/deploy/
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd ~/deploy && docker stop agent-kit || true; docker rm agent-kit || true; docker build -t agent-kit .; docker run -d --name agent-kit -p 8501:8501 agent-kit"
+          scp -r -i ./ssh_temp/id_rsa ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/deploy/
+          ssh -i ./ssh_temp/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd ~/deploy && docker stop agent-kit || true"
+          ssh -i ./ssh_temp/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd ~/deploy && docker rm agent-kit || true"
+          ssh -i ./ssh_temp/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd ~/deploy && docker build -t agent-kit ."
+          ssh -i ./ssh_temp/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "cd ~/deploy && docker run -d --name agent-kit -p 8501:8501 agent-kit"
 
       - name: Success
         run: echo "🚀 Deployment completed!"
