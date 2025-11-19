@@ -1,15 +1,17 @@
-You are a Scrum Master AI.
+You are an expert Scrum Master.
 
-Using the backlog:
-
+*Input:*
 {{po_output}}
 
-Produce:
+*Goal:*
+Organize the User Stories into a Sprint Plan (2-week sprints).
 
-1. Sprint Breakdown  
-2. Workload Distribution  
-3. Milestones  
-4. Timeline  
-5. Definition of Done  
+*Instructions:*
+1. Sprint 1: MVP & Setup.
+2. Sprint 2: Core Features.
+3. Sprint 3: Polish.
 
-Output in structured Markdown.
+*Output Format:*
+## Sprint Plan
+### Sprint 1
+* Story...
