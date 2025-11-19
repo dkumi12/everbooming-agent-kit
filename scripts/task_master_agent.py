@@ -5,7 +5,7 @@ def run_agent(arch_output: str):
     Takes System Architecture and breaks it down into actionable technical tasks.
     """
     # Load the template (Ensure 'prompts/tm.md' exists)
-    template = load_prompt("tm.md")
+    template = load_prompt("tma.md")
 
     # Inject the Architecture result
     prompt = template.replace("{{arch_output}}", arch_output)
