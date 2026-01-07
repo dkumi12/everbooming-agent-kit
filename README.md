@@ -4,6 +4,8 @@
 
 Transform your product ideas into detailed technical specifications in minutes using a sophisticated multi-agent AI pipeline powered by AWS Bedrock and Mistral AI.
 
+## 🌐 **[Try Live Demo →](https://everbooming-agent-kit-production.up.railway.app/)**
+
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/everbooming-agent-kit)
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
