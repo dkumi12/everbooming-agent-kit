@@ -18,12 +18,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application source code
 COPY . /app
 
-# Expose Streamlit port
+# Make startup script executable
+RUN chmod +x start.sh
+
+# Expose Streamlit port (Railway will override this)
 EXPOSE 8501
 
-# Streamlit environment configs
-ENV STREAMLIT_SERVER_PORT=8501
-ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
-
-# Run Streamlit app
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Use startup script that handles dynamic PORT
+CMD ["./start.sh"]
