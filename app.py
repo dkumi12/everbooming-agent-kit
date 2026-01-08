@@ -2,6 +2,12 @@ import streamlit as st
 from datetime import datetime
 import zipfile
 from io import BytesIO
+import markdown
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
 # Import all agent functions
 from scripts.ba_agent import run_agent as run_ba
@@ -11,6 +17,81 @@ from scripts.arch_agent import run_agent as run_arch
 from scripts.po_agent import run_agent as run_po
 from scripts.sm_agent import run_agent as run_sm
 from scripts.task_master_agent import run_agent as run_tma
+
+
+def create_pdf(content, idea, timestamp):
+    """Generate PDF from markdown content"""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter,
+                          topMargin=0.75*inch, bottomMargin=0.75*inch,
+                          leftMargin=0.75*inch, rightMargin=0.75*inch)
+    
+    styles = getSampleStyleSheet()
+    
+    # Custom styles
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor='#1f77b4',
+        spaceAfter=12,
+        alignment=TA_CENTER
+    )
+    
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=16,
+        textColor='#2c3e50',
+        spaceAfter=10,
+        spaceBefore=10
+    )
+    
+    body_style = ParagraphStyle(
+        'CustomBody',
+        parent=styles['BodyText'],
+        fontSize=10,
+        leading=14,
+        spaceAfter=8
+    )
+    
+    story = []
+    
+    # Title page
+    story.append(Paragraph("🚀 Everbooming Agent Kit", title_style))
+    story.append(Spacer(1, 0.2*inch))
+    story.append(Paragraph(f"<b>Product Idea:</b> {idea}", body_style))
+    story.append(Paragraph(f"<b>Generated:</b> {datetime.now().strftime('%B %d, %Y at %I:%M %p')}", body_style))
+    story.append(Spacer(1, 0.3*inch))
+    story.append(PageBreak())
+    
+    # Process markdown content - simple conversion
+    lines = content.split('\n')
+    for line in lines:
+        if line.startswith('# '):
+            story.append(Paragraph(line[2:], title_style))
+        elif line.startswith('## '):
+            story.append(Paragraph(line[3:], heading_style))
+        elif line.startswith('### '):
+            story.append(Paragraph(line[4:], styles['Heading3']))
+        elif line.strip().startswith('---'):
+            story.append(Spacer(1, 0.2*inch))
+        elif line.strip():
+            # Clean the line for PDF
+            clean_line = line.replace('**', '<b>').replace('**', '</b>')
+            clean_line = clean_line.replace('*', '<i>').replace('*', '</i>')
+            try:
+                story.append(Paragraph(clean_line, body_style))
+            except:
+                # If paragraph fails, just add as plain text
+                pass
+        else:
+            story.append(Spacer(1, 0.1*inch))
+    
+    # Build PDF
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
 
 st.set_page_config(page_title="Everbooming Agent Kit", layout="wide")
 st.title("🚀 Everbooming Agent Kit")
@@ -135,14 +216,17 @@ if st.button("Run Full Pipeline"):
     # Download buttons
     st.divider()
     
+    # Generate PDF
+    pdf_buffer = create_pdf(combined_content, idea, timestamp)
+    
     col1, col2 = st.columns(2)
     
     with col1:
         st.download_button(
-            label="📄 Download Complete Report (Markdown)",
-            data=combined_content,
-            file_name=f"Everbooming_Complete_Report_{timestamp}.md",
-            mime="text/markdown",
+            label="📄 Download Complete Report (PDF)",
+            data=pdf_buffer.getvalue(),
+            file_name=f"Everbooming_Complete_Report_{timestamp}.pdf",
+            mime="application/pdf",
             use_container_width=True,
             type="primary"
         )

@@ -3,3 +3,5 @@ boto3
 python-dotenv
 requests
 httpx
+markdown
+reportlab
