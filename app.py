@@ -132,14 +132,26 @@ if st.button("Run Full Pipeline"):
     
     zip_buffer.seek(0)
     
-    # Download button
+    # Download buttons
     st.divider()
-    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.download_button(
+            label="📄 Download Complete Report (Markdown)",
+            data=combined_content,
+            file_name=f"Everbooming_Complete_Report_{timestamp}.md",
+            mime="text/markdown",
+            use_container_width=True,
+            type="primary"
+        )
+    
     with col2:
         st.download_button(
-            label="📥 Download All Outputs (ZIP)",
+            label="📦 Download Separate Files (ZIP)",
             data=zip_buffer.getvalue(),
-            file_name=f"everbooming_output_{timestamp}.zip",
+            file_name=f"everbooming_outputs_{timestamp}.zip",
             mime="application/zip",
             use_container_width=True
         )
