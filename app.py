@@ -9,8 +9,9 @@ from scripts.po_agent import run_agent as run_po
 from scripts.sm_agent import run_agent as run_sm
 from scripts.task_master_agent import run_agent as run_tma
 
-st.set_page_config(page_title="Everbooming AI Kit", layout="wide")
-st.title("Everbooming AWS-Native AI Software Development Kit")
+st.set_page_config(page_title="Everbooming Agent Kit", layout="wide")
+st.title("🚀 Everbooming Agent Kit")
+st.subheader("AI-Powered SDLC Automation with AWS Bedrock")
 
 # Input
 idea = st.text_input("💡 Enter your product idea", "A mobile app for dog walkers to find clients")
