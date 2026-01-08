@@ -1,10 +1,10 @@
 # 🚀 Everbooming Agent Kit
 
-> **AWS-Native AI-Powered Software Development Lifecycle Automation**
+> **AI-Powered Software Development Lifecycle Automation with AWS Bedrock**
 
 Transform your product ideas into detailed technical specifications in minutes using a sophisticated multi-agent AI pipeline powered by AWS Bedrock and Mistral AI.
 
-## 🌐 **[Try Live Demo →](https://everbooming-agent-kit-production.up.railway.app/)**
+## 🌐 **[🚀 TRY LIVE DEMO](https://everbooming-agent-kit-production.up.railway.app/)** ← Click to test now!
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/everbooming-agent-kit)
 
@@ -224,10 +224,13 @@ outputs/
 
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
-| AI Models | AWS Bedrock + Mistral Large | Core intelligence & reasoning |
+| AI Engine | AWS Bedrock + Mistral Large | Core intelligence & reasoning |
 | Documentation | Context7 API | Live technical documentation |
 | Frontend | Streamlit | Interactive web UI |
 | Backend | Python 3.12 | Agent orchestration |
+| Cloud Deployment | Railway | Hosting & CI/CD |
+| Containerization | Docker | Portable deployment |
+| State | File system | Output persistence |
 | Cloud | AWS (Bedrock, IAM) | AI infrastructure |
 | Deployment | Docker + Railway | Easy hosting & scaling |
 | State | File system | Output persistence |
