@@ -125,7 +125,7 @@ def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0
             "messages": [
                 {
                     "role": "system", 
-                    "content": "You are a professional AI assistant. Provide direct, clean responses without showing your reasoning process, thinking steps, or using XML tags like <reasoning> or <thinking>. Start your response immediately with the requested content."
+                    "content": "You are a professional AI assistant with GLOBAL perspective. Provide direct, clean responses without showing your reasoning process, thinking steps, or using XML tags like <reasoning> or <thinking>. When analyzing markets or products, always consider INTERNATIONAL contexts and avoid US-centric bias. Include data and perspectives from multiple regions: North America, Europe, Asia-Pacific, Latin America, and Africa/Middle East. Use proper markdown formatting with generous whitespace, clear section breaks, and well-structured tables. Start your response immediately with the requested content."
                 },
                 {"role": "user", "content": prompt}
             ],
