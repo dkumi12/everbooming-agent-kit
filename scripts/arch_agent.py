@@ -106,9 +106,9 @@ The following up-to-date documentation has been fetched for the recommended tech
     # Replace PRD placeholder
     prompt = enhanced_prompt.replace("{{prd_output}}", prd_output)
     
-    # Call GPT-OSS-20B for architecture design
-    print("🤖 Generating architecture design with GPT-OSS-20B...\n")
-    output = generate_response(prompt, "arn:aws:bedrock:us-east-1::foundation-model/gpt-oss-20b")
+    # Call Mistral Large for architecture design (with higher temperature for creativity)
+    print("🤖 Generating architecture design with Mistral Large 2...\n")
+    output = generate_response(prompt, "mistral.mistral-large-2402-v1:0")
     
     # Save outputs
     save_output("04_architecture_design", output)

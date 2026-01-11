@@ -52,25 +52,32 @@ def save_output(name: str, content: str):
 
 
 # ---------------------------------------------------------
-#  MODEL INVOCATION (Multi-Model Support)
+#  MODEL INVOCATION (Multi-Model Support with Temperature)
 # ---------------------------------------------------------
 
-def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0"):
+def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0", temperature: float = 0.7):
     """
-    Invoke AI models on AWS Bedrock with multi-model support.
+    Invoke AI models on AWS Bedrock with customizable parameters.
     
     Supported Models:
     - Mistral Large: mistral.mistral-large-2402-v1:0
-    - GPT-OSS 20B: arn:aws:bedrock:us-east-1::foundation-model/gpt-oss-20b
+    - Mistral Small: mistral.mistral-small-2402-v1:0
+    - Amazon Titan: amazon.titan-text-express-v1
+    - Claude 3: anthropic.claude-3-sonnet-20240229-v1:0
+    - AI21 Jurassic: ai21.j2-ultra-v1
+    - Cohere Command: cohere.command-text-v14
     
     Model-Specific Formatting:
     - Mistral: <s>[INST] {prompt} [/INST]
-    - GPT-OSS: Direct prompt (no special formatting)
+    - Others: Direct prompt (no special formatting)
     """
     
     # Determine model type
     is_mistral = "mistral" in model.lower()
-    is_gpt_oss = "gpt-oss" in model.lower()
+    is_claude = "claude" in model.lower()
+    is_titan = "titan" in model.lower()
+    is_ai21 = "ai21" in model.lower()
+    is_cohere = "cohere" in model.lower()
     
     # Format prompt based on model
     if is_mistral:
@@ -79,16 +86,44 @@ def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0
         payload = {
             "prompt": formatted_prompt,
             "max_tokens": 2000,
-            "temperature": 0.7,
+            "temperature": temperature,
             "top_p": 0.9
         }
-    elif is_gpt_oss:
-        # GPT-OSS uses standard messages format
+    elif is_claude:
+        # Claude uses messages format
+        payload = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 2000,
+            "temperature": temperature,
+            "messages": [
+                {"role": "user", "content": prompt}
+            ]
+        }
+    elif is_titan:
+        # Amazon Titan format
+        payload = {
+            "inputText": prompt,
+            "textGenerationConfig": {
+                "maxTokenCount": 2000,
+                "temperature": temperature,
+                "topP": 0.9
+            }
+        }
+    elif is_ai21:
+        # AI21 Jurassic format
+        payload = {
+            "prompt": prompt,
+            "maxTokens": 2000,
+            "temperature": temperature,
+            "topP": 0.9
+        }
+    elif is_cohere:
+        # Cohere Command format
         payload = {
             "prompt": prompt,
             "max_tokens": 2000,
-            "temperature": 0.7,
-            "top_p": 0.9
+            "temperature": temperature,
+            "p": 0.9
         }
     else:
         # Default: treat as Mistral-compatible
@@ -96,7 +131,7 @@ def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0
         payload = {
             "prompt": formatted_prompt,
             "max_tokens": 2000,
-            "temperature": 0.7,
+            "temperature": temperature,
             "top_p": 0.9
         }
 
@@ -115,20 +150,26 @@ def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0
         if is_mistral and "outputs" in data and len(data["outputs"]) > 0:
             # Mistral Output: { "outputs": [ { "text": "..." } ] }
             return data["outputs"][0]["text"].strip()
-        elif is_gpt_oss:
-            # GPT-OSS may use different format - adapt as needed
-            if "text" in data:
-                return data["text"].strip()
-            elif "completion" in data:
-                return data["completion"].strip()
-            elif "outputs" in data and len(data["outputs"]) > 0:
-                return data["outputs"][0]["text"].strip()
+        elif is_claude and "content" in data and len(data["content"]) > 0:
+            # Claude Output: { "content": [ { "text": "..." } ] }
+            return data["content"][0]["text"].strip()
+        elif is_titan and "results" in data and len(data["results"]) > 0:
+            # Titan Output: { "results": [ { "outputText": "..." } ] }
+            return data["results"][0]["outputText"].strip()
+        elif is_ai21 and "completions" in data and len(data["completions"]) > 0:
+            # AI21 Output: { "completions": [ { "data": { "text": "..." } } ] }
+            return data["completions"][0]["data"]["text"].strip()
+        elif is_cohere and "generations" in data and len(data["generations"]) > 0:
+            # Cohere Output: { "generations": [ { "text": "..." } ] }
+            return data["generations"][0]["text"].strip()
         
         # Fallback for unknown format
         if "outputs" in data and len(data["outputs"]) > 0:
             return data["outputs"][0]["text"].strip()
         elif "text" in data:
             return data["text"].strip()
+        elif "completion" in data:
+            return data["completion"].strip()
             
         raise ValueError(f"Unexpected response structure from {model}: {data.keys()}")
 
