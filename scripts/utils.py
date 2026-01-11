@@ -20,6 +20,35 @@ bedrock = boto3.client(
 )
 
 # ---------------------------------------------------------
+#  OUTPUT CLEANING
+# ---------------------------------------------------------
+
+def clean_output(text: str) -> str:
+    """
+    Clean AI output by removing reasoning tags and meta-commentary.
+    """
+    import re
+    
+    # Remove <reasoning>...</reasoning> tags and content
+    text = re.sub(r'<reasoning>.*?</reasoning>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    
+    # Remove <thinking>...</thinking> tags and content
+    text = re.sub(r'<thinking>.*?</thinking>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    
+    # Remove other common meta tags
+    text = re.sub(r'<scratchpad>.*?</scratchpad>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'<draft>.*?</draft>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    
+    # Remove leading "Let me..." or "I'll..." phrases
+    text = re.sub(r'^(Let me |I\'ll |I will )[^\n]+\n+', '', text, flags=re.MULTILINE)
+    
+    # Clean up extra whitespace
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    
+    return text.strip()
+
+
+# ---------------------------------------------------------
 #  PROMPT LOADING
 # ---------------------------------------------------------
 
@@ -94,6 +123,10 @@ def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0
         # GPT-OSS uses OpenAI-style messages format
         payload = {
             "messages": [
+                {
+                    "role": "system", 
+                    "content": "You are a professional AI assistant. Provide direct, clean responses without showing your reasoning process, thinking steps, or using XML tags like <reasoning> or <thinking>. Start your response immediately with the requested content."
+                },
                 {"role": "user", "content": prompt}
             ],
             "max_completion_tokens": 2000,
@@ -164,7 +197,8 @@ def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0
             return data["outputs"][0]["text"].strip()
         elif is_gpt_oss and "choices" in data and len(data["choices"]) > 0:
             # GPT-OSS Output: { "choices": [ { "message": { "content": "..." } } ] }
-            return data["choices"][0]["message"]["content"].strip()
+            output = data["choices"][0]["message"]["content"].strip()
+            return clean_output(output)  # Clean reasoning tags from GPT-OSS
         elif is_claude and "content" in data and len(data["content"]) > 0:
             # Claude Output: { "content": [ { "text": "..." } ] }
             return data["content"][0]["text"].strip()
