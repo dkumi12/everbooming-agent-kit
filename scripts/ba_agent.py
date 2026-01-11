@@ -5,8 +5,8 @@ def run_agent(idea: str):
     prompt_template = load_prompt("ba.md")
     prompt = prompt_template.replace("{{idea}}", idea)
 
-    # CALL MISTRAL
-    output = generate_response(prompt, "mistral.mistral-large-2402-v1:0")
+    # CALL GPT-OSS-20B
+    output = generate_response(prompt, "arn:aws:bedrock:us-east-1::foundation-model/gpt-oss-20b")
 
     save_output("01_business_analysis", output)
     return output

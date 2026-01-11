@@ -8,6 +8,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Import all agent functions
 from scripts.ba_agent import run_agent as run_ba
@@ -132,17 +133,28 @@ if st.button("Run Full Pipeline"):
         with st.expander("🏗️ Architecture Output", expanded=True):
             st.markdown(arch)
 
-    # 5. Task Master (Technical Tasks)
-    with st.spinner("Generating Technical Tasks (Task Master)..."):
-        tasks = run_tma(arch)
+    # 5 & 6. Task Master + Product Owner (PARALLEL EXECUTION)
+    with st.spinner("Generating Technical Tasks & User Stories (parallel)..."):
+        tasks = None
+        po = None
+        
+        # Run both agents in parallel using ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            # Submit both tasks
+            future_tma = executor.submit(run_tma, arch)
+            future_po = executor.submit(run_po, arch)
+            
+            # Wait for both to complete
+            tasks = future_tma.result()
+            po = future_po.result()
+        
+        # Store outputs
         all_outputs["05_Technical_Tasks"] = tasks
+        all_outputs["06_User_Stories"] = po
+        
+        # Display outputs
         with st.expander("⚙️ Technical Tasks Breakdown", expanded=True):
             st.markdown(tasks)
-
-    # 6. Product Owner (User Stories)
-    with st.spinner("Generating User Stories (PO)..."):
-        po = run_po(arch)
-        all_outputs["06_User_Stories"] = po
         with st.expander("👥 Product Owner Output", expanded=True):
             st.markdown(po)
 
@@ -249,7 +261,7 @@ st.markdown(
             AI-Powered SDLC Automation with AWS Bedrock
         </p>
         <p style='font-size: 12px; margin: 5px 0 0 0;'>
-            Powered by Mistral Large 2 • Built with Streamlit • Deployed on Railway
+            Powered by Mistral Large 2 & GPT-OSS-20B • Built with Streamlit • Deployed on Railway
         </p>
     </div>
     """,

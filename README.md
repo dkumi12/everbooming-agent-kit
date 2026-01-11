@@ -2,7 +2,7 @@
 
 > **AI-Powered Software Development Lifecycle Automation with AWS Bedrock**
 
-Transform your product ideas into detailed technical specifications in minutes using a sophisticated multi-agent AI pipeline powered by AWS Bedrock and Mistral AI.
+Transform your product ideas into detailed technical specifications in minutes using a sophisticated multi-agent AI pipeline powered by AWS Bedrock with Mistral Large 2 and GPT-OSS-20B.
 
 ## 🌐 **[🚀 TRY LIVE DEMO](https://everbooming-agent-kit-production.up.railway.app/)** ← Click to test now!
 
@@ -24,9 +24,9 @@ A mobile app for dog walkers to find clients
 ```
 
 **Output Includes:** 
-- ✅ Business analysis with user personas
+- ✅ Business analysis with user personas (GPT-OSS-20B)
 - ✅ Product requirements document (PRD)
-- ✅ System architecture with tech stack recommendations
+- ✅ System architecture with tech stack recommendations (GPT-OSS-20B)
 - ✅ Database schemas and API endpoints
 - ✅ Technical tasks breakdown for developers
 - ✅ User stories with acceptance criteria
@@ -36,48 +36,54 @@ A mobile app for dog walkers to find clients
 
 ## 🏗️ Architecture
 
-### Multi-Agent Pipeline
+### Multi-Agent Pipeline with Parallel Execution
 
 ```
                     Product Idea
                          ↓
         ┌────────────────────────────────────┐
         │  [1] Business Analyst              │
-        │  Problem definition, user personas │
+        │  GPT-OSS-20B • Business reasoning  │
         └────────────────┬───────────────────┘
                          ↓
         ┌────────────────────────────────────┐
         │  [2] Project Manager               │
-        │  Timeline, resources, strategy     │
+        │  Mistral Large 2 • Planning        │
         └────────────────┬───────────────────┘
                          ↓
         ┌────────────────────────────────────┐
         │  [3] PRD Generator                 │
-        │  Comprehensive product requirements│
+        │  Mistral Large 2 • Requirements    │
         └────────────────┬───────────────────┘
                          ↓
         ┌────────────────────────────────────┐
         │  [4] System Architect              │
+        │  GPT-OSS-20B • Tech architecture   │
         │  + Context7 Live Documentation     │
         └────┬───────────┬───────────────┬───┘
-             ↓           ↓               ↓
+             │           │               │
+             │   ┌───────┴──────┐        │
+             │   │  PARALLEL    │        │
+             ↓   ↓   EXECUTION  ↓        ↓
         ┌────────┐  ┌───────────┐  ┌─────────┐
-        │Task    │  │Product    │  │Context7 │
+        │[5] Task│  │[6] Product│  │Context7 │
         │Master  │  │Owner      │  │Docs API │
-        │        │  │           │  │         │
+        │Mistral │  │Mistral    │  │         │
         └───┬────┘  └─────┬─────┘  └─────────┘
             │             │
             └──────┬──────┘
                    ↓
         ┌────────────────────────────────────┐
         │  [7] Scrum Master                  │
-        │  Sprint planning & organization    │
+        │  Mistral Large 2 • Sprint planning │
         └────────────────────────────────────┘
 ```
 
 ### Key Features
 
-✅ **AWS Bedrock Integration** - Production-grade AI using Mistral Large  
+✅ **Multi-Model Architecture** - GPT-OSS-20B for BA & Architecture, Mistral Large 2 for other agents  
+✅ **Parallel Execution** - Task Master & Product Owner run simultaneously (40% faster)  
+✅ **AWS Bedrock Integration** - Production-grade AI infrastructure  
 ✅ **Context7 Documentation** - Live API docs and best practices fetching  
 ✅ **Docker Ready** - One-command deployment anywhere  
 ✅ **Railway Compatible** - Deploy with single click  

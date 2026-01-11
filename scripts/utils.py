@@ -52,30 +52,53 @@ def save_output(name: str, content: str):
 
 
 # ---------------------------------------------------------
-#  MISTRAL MODEL INVOCATION
+#  MODEL INVOCATION (Multi-Model Support)
 # ---------------------------------------------------------
 
 def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0"):
     """
-    Invoke Mistral models on AWS Bedrock.
+    Invoke AI models on AWS Bedrock with multi-model support.
     
-    Mistral Specifics:
-    - Format: <s>[INST] {prompt} [/INST]
-    - Input Key: "prompt"
-    - Output Key: "outputs"[0]["text"]
+    Supported Models:
+    - Mistral Large: mistral.mistral-large-2402-v1:0
+    - GPT-OSS 20B: arn:aws:bedrock:us-east-1::foundation-model/gpt-oss-20b
+    
+    Model-Specific Formatting:
+    - Mistral: <s>[INST] {prompt} [/INST]
+    - GPT-OSS: Direct prompt (no special formatting)
     """
-
-    # 1. Format the Prompt (Mistral Instruct Syntax)
-    # Mistral requires these specific tags to know where the user input starts/ends
-    formatted_prompt = f"<s>[INST] {prompt} [/INST]"
-
-    # 2. Construct Payload
-    payload = {
-        "prompt": formatted_prompt,
-        "max_tokens": 2000,
-        "temperature": 0.7,
-        "top_p": 0.9
-    }
+    
+    # Determine model type
+    is_mistral = "mistral" in model.lower()
+    is_gpt_oss = "gpt-oss" in model.lower()
+    
+    # Format prompt based on model
+    if is_mistral:
+        # Mistral requires specific instruction tags
+        formatted_prompt = f"<s>[INST] {prompt} [/INST]"
+        payload = {
+            "prompt": formatted_prompt,
+            "max_tokens": 2000,
+            "temperature": 0.7,
+            "top_p": 0.9
+        }
+    elif is_gpt_oss:
+        # GPT-OSS uses standard messages format
+        payload = {
+            "prompt": prompt,
+            "max_tokens": 2000,
+            "temperature": 0.7,
+            "top_p": 0.9
+        }
+    else:
+        # Default: treat as Mistral-compatible
+        formatted_prompt = f"<s>[INST] {prompt} [/INST]"
+        payload = {
+            "prompt": formatted_prompt,
+            "max_tokens": 2000,
+            "temperature": 0.7,
+            "top_p": 0.9
+        }
 
     try:
         response = bedrock.invoke_model(
@@ -85,16 +108,29 @@ def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0
             contentType="application/json"
         )
 
-        # 3. Parse Response
+        # Parse Response
         data = json.loads(response["body"].read())
 
-        # Mistral Output Schema:
-        # { "outputs": [ { "text": "Result string...", ... } ] }
-        if "outputs" in data and len(data["outputs"]) > 0:
-            # Strip the leading whitespace usually returned by Mistral
+        # Handle different response formats
+        if is_mistral and "outputs" in data and len(data["outputs"]) > 0:
+            # Mistral Output: { "outputs": [ { "text": "..." } ] }
             return data["outputs"][0]["text"].strip()
+        elif is_gpt_oss:
+            # GPT-OSS may use different format - adapt as needed
+            if "text" in data:
+                return data["text"].strip()
+            elif "completion" in data:
+                return data["completion"].strip()
+            elif "outputs" in data and len(data["outputs"]) > 0:
+                return data["outputs"][0]["text"].strip()
+        
+        # Fallback for unknown format
+        if "outputs" in data and len(data["outputs"]) > 0:
+            return data["outputs"][0]["text"].strip()
+        elif "text" in data:
+            return data["text"].strip()
             
-        raise ValueError(f"Unexpected Mistral response structure: {data.keys()}")
+        raise ValueError(f"Unexpected response structure from {model}: {data.keys()}")
 
     except Exception as e:
-        return f"Error invoking Mistral ({model}): {str(e)}"
+        return f"Error invoking model ({model}): {str(e)}"
