@@ -6,8 +6,6 @@ Transform your product ideas into detailed technical specifications in minutes u
 
 ## 🌐 **[🚀 TRY LIVE DEMO](https://everbooming-agent-kit-production.up.railway.app/)** ← Click to test now!
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/everbooming-agent-kit)
-
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![AWS Bedrock](https://img.shields.io/badge/AWS-Bedrock-orange)
 ![Streamlit](https://img.shields.io/badge/Streamlit-Latest-red)
