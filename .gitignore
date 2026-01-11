@@ -65,3 +65,12 @@ htmlcov/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# AWS CLI (not needed - app uses boto3)
+aws/
+
+# Redundant documentation (removed)
+START_HERE.md
+DEPLOYMENT_READY.md
+RAILWAY_DEPLOY.md
+QUICK_DEPLOY.md
