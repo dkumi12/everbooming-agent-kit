@@ -44,16 +44,25 @@ def create_pdf(content, idea, timestamp):
         parent=styles['Heading2'],
         fontSize=16,
         textColor='#2c3e50',
-        spaceAfter=10,
-        spaceBefore=10
+        spaceAfter=18,  # Increased from 10
+        spaceBefore=18  # Increased from 10
+    )
+    
+    heading3_style = ParagraphStyle(
+        'CustomHeading3',
+        parent=styles['Heading3'],
+        fontSize=14,
+        textColor='#34495e',
+        spaceAfter=12,
+        spaceBefore=12
     )
     
     body_style = ParagraphStyle(
         'CustomBody',
         parent=styles['BodyText'],
         fontSize=10,
-        leading=14,
-        spaceAfter=8
+        leading=16,  # Increased line height from 14
+        spaceAfter=10  # Increased from 8
     )
     
     story = []
@@ -70,13 +79,24 @@ def create_pdf(content, idea, timestamp):
     lines = content.split('\n')
     for line in lines:
         if line.startswith('# '):
+            story.append(Spacer(1, 0.1*inch))  # Add space before title
             story.append(Paragraph(line[2:], title_style))
+            story.append(Spacer(1, 0.15*inch))  # Add space after title
         elif line.startswith('## '):
+            story.append(Spacer(1, 0.15*inch))  # Add space before heading
             story.append(Paragraph(line[3:], heading_style))
         elif line.startswith('### '):
-            story.append(Paragraph(line[4:], styles['Heading3']))
+            story.append(Spacer(1, 0.1*inch))  # Add space before subheading
+            story.append(Paragraph(line[4:], heading3_style))
         elif line.strip().startswith('---'):
-            story.append(Spacer(1, 0.2*inch))
+            story.append(Spacer(1, 0.4*inch))  # Increased from 0.2
+        elif line.strip().startswith('|') and '|' in line[1:]:
+            # Table row - handle specially with less spacing
+            clean_line = line.replace('**', '<b>').replace('**', '</b>')
+            try:
+                story.append(Paragraph(clean_line, body_style))
+            except:
+                pass
         elif line.strip():
             # Clean the line for PDF
             clean_line = line.replace('**', '<b>').replace('**', '</b>')
@@ -87,7 +107,8 @@ def create_pdf(content, idea, timestamp):
                 # If paragraph fails, just add as plain text
                 pass
         else:
-            story.append(Spacer(1, 0.1*inch))
+            # Empty line - add small spacer
+            story.append(Spacer(1, 0.15*inch))  # Increased from 0.1
     
     # Build PDF
     doc.build(story)
