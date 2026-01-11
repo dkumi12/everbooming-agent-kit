@@ -74,6 +74,7 @@ def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0
     
     # Determine model type
     is_mistral = "mistral" in model.lower()
+    is_gpt_oss = "gpt-oss" in model.lower() or "openai" in model.lower()
     is_claude = "claude" in model.lower()
     is_titan = "titan" in model.lower()
     is_ai21 = "ai21" in model.lower()
@@ -88,6 +89,17 @@ def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0
             "max_tokens": 2000,
             "temperature": temperature,
             "top_p": 0.9
+        }
+    elif is_gpt_oss:
+        # GPT-OSS uses OpenAI-style messages format
+        payload = {
+            "messages": [
+                {"role": "user", "content": prompt}
+            ],
+            "max_completion_tokens": 2000,
+            "temperature": temperature,
+            "top_p": 0.9,
+            "stream": False
         }
     elif is_claude:
         # Claude uses messages format
@@ -150,6 +162,9 @@ def generate_response(prompt: str, model: str = "mistral.mistral-large-2402-v1:0
         if is_mistral and "outputs" in data and len(data["outputs"]) > 0:
             # Mistral Output: { "outputs": [ { "text": "..." } ] }
             return data["outputs"][0]["text"].strip()
+        elif is_gpt_oss and "choices" in data and len(data["choices"]) > 0:
+            # GPT-OSS Output: { "choices": [ { "message": { "content": "..." } } ] }
+            return data["choices"][0]["message"]["content"].strip()
         elif is_claude and "content" in data and len(data["content"]) > 0:
             # Claude Output: { "content": [ { "text": "..." } ] }
             return data["content"][0]["text"].strip()

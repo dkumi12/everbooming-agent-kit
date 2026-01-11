@@ -9,6 +9,9 @@ AVAILABLE_MODELS = {
     "mistral-large": "mistral.mistral-large-2402-v1:0",
     "mistral-small": "mistral.mistral-small-2402-v1:0",
     
+    # OpenAI GPT-OSS Models
+    "gpt-oss-20b": "openai.gpt-oss-20b-1:0",
+    
     # Amazon Titan Models
     "titan-text-express": "amazon.titan-text-express-v1",
     "titan-text-lite": "amazon.titan-text-lite-v1",
@@ -28,13 +31,13 @@ AVAILABLE_MODELS = {
 
 # Agent-to-Model Mapping
 AGENT_MODELS = {
-    "ba": "mistral-large",           # Business Analyst
-    "pm": "mistral-large",           # Project Manager  
-    "prd": "mistral-large",          # PRD Generator
-    "arch": "mistral-large",         # System Architect
-    "tma": "mistral-large",          # Task Master
-    "po": "mistral-large",           # Product Owner
-    "sm": "mistral-large",           # Scrum Master
+    "ba": "gpt-oss-20b",         # Business Analyst - GPT-OSS for business reasoning
+    "pm": "mistral-large",       # Project Manager  
+    "prd": "mistral-large",      # PRD Generator
+    "arch": "gpt-oss-20b",       # System Architect - GPT-OSS for architecture
+    "tma": "mistral-large",      # Task Master
+    "po": "mistral-large",       # Product Owner
+    "sm": "mistral-large",       # Scrum Master
 }
 
 # Model-Specific Temperature Settings

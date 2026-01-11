@@ -261,7 +261,7 @@ st.markdown(
             AI-Powered SDLC Automation with AWS Bedrock
         </p>
         <p style='font-size: 12px; margin: 5px 0 0 0;'>
-            Powered by Mistral Large 2 • Built with Streamlit • Deployed on Railway
+            Powered by Mistral Large 2 & GPT-OSS-20B • Built with Streamlit • Deployed on Railway
         </p>
     </div>
     """,
