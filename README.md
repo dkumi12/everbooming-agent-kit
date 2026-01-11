@@ -2,7 +2,7 @@
 
 > **AI-Powered Software Development Lifecycle Automation with AWS Bedrock**
 
-Transform your product ideas into detailed technical specifications in minutes using a sophisticated multi-agent AI pipeline powered by AWS Bedrock with Mistral Large 2, optimized with parallel execution and per-agent temperature tuning.
+Transform your product ideas into detailed technical specifications in minutes using a sophisticated multi-agent AI pipeline powered by AWS Bedrock with Mistral Large 2 and OpenAI GPT-OSS-20B.
 
 ## 🌐 **[🚀 TRY LIVE DEMO](https://everbooming-agent-kit-production.up.railway.app/)** ← Click to test now!
 
@@ -24,13 +24,13 @@ A mobile app for dog walkers to find clients
 ```
 
 **Output Includes:** 
-- ✅ Business analysis with user personas (temp=0.7 for balanced reasoning)
-- ✅ Product requirements document (temp=0.6 for precision)
-- ✅ System architecture with tech stack (temp=0.8 for creative design)
+- ✅ Business analysis with user personas (GPT-OSS-20B)
+- ✅ Product requirements document (Mistral Large 2)
+- ✅ System architecture with tech stack (GPT-OSS-20B)
 - ✅ Database schemas and API endpoints
-- ✅ Technical tasks breakdown (temp=0.5 for structure)
-- ✅ User stories with acceptance criteria (temp=0.7)
-- ✅ Sprint planning roadmap (temp=0.6 for organization)
+- ✅ Technical tasks breakdown for developers
+- ✅ User stories with acceptance criteria
+- ✅ Sprint planning roadmap for 2-week sprints
 
 ---
 
@@ -43,22 +43,22 @@ A mobile app for dog walkers to find clients
                          ↓
         ┌────────────────────────────────────┐
         │  [1] Business Analyst              │
-        │  Mistral Large 2 • temp=0.7        │
+        │  GPT-OSS-20B • Business reasoning  │
         └────────────────┬───────────────────┘
                          ↓
         ┌────────────────────────────────────┐
         │  [2] Project Manager               │
-        │  Mistral Large 2 • temp=0.6        │
+        │  Mistral Large 2 • Planning        │
         └────────────────┬───────────────────┘
                          ↓
         ┌────────────────────────────────────┐
         │  [3] PRD Generator                 │
-        │  Mistral Large 2 • temp=0.6        │
+        │  Mistral Large 2 • Requirements    │
         └────────────────┬───────────────────┘
                          ↓
         ┌────────────────────────────────────┐
         │  [4] System Architect              │
-        │  Mistral Large 2 • temp=0.8 🎨     │
+        │  GPT-OSS-20B • Tech architecture   │
         │  + Context7 Live Documentation     │
         └────┬───────────┬───────────────┬───┘
              │           │               │
@@ -68,22 +68,22 @@ A mobile app for dog walkers to find clients
         ┌────────┐  ┌───────────┐  ┌─────────┐
         │[5] Task│  │[6] Product│  │Context7 │
         │Master  │  │Owner      │  │Docs API │
-        │temp=0.5│  │temp=0.7   │  │         │
+        │Mistral │  │Mistral    │  │         │
         └───┬────┘  └─────┬─────┘  └─────────┘
             │             │
             └──────┬──────┘
                    ↓
         ┌────────────────────────────────────┐
         │  [7] Scrum Master                  │
-        │  Mistral Large 2 • temp=0.6        │
+        │  Mistral Large 2 • Sprint planning │
         └────────────────────────────────────┘
 ```
 
 ### Key Features
 
-✅ **Temperature-Optimized Pipeline** - Per-agent temperature settings for optimal output quality  
+✅ **Multi-Model Architecture** - GPT-OSS-20B for BA & Architecture, Mistral Large 2 for planning & execution  
 ✅ **Parallel Execution** - Task Master & Product Owner run simultaneously (50% faster)  
-✅ **AWS Bedrock Integration** - Production-grade Mistral Large 2 infrastructure  
+✅ **AWS Bedrock Integration** - Production-grade AI infrastructure  
 ✅ **Context7 Documentation** - Live API docs and best practices fetching  
 ✅ **Docker Ready** - One-command deployment anywhere  
 ✅ **Railway Compatible** - Deploy with single click  

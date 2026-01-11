@@ -31,10 +31,10 @@ AVAILABLE_MODELS = {
 
 # Agent-to-Model Mapping
 AGENT_MODELS = {
-    "ba": "mistral-large",       # Business Analyst
+    "ba": "gpt-oss-20b",         # Business Analyst - GPT-OSS for business reasoning
     "pm": "mistral-large",       # Project Manager  
     "prd": "mistral-large",      # PRD Generator
-    "arch": "mistral-large",     # System Architect
+    "arch": "gpt-oss-20b",       # System Architect - GPT-OSS for architecture
     "tma": "mistral-large",      # Task Master
     "po": "mistral-large",       # Product Owner
     "sm": "mistral-large",       # Scrum Master

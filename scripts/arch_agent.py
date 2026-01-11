@@ -106,9 +106,9 @@ The following up-to-date documentation has been fetched for the recommended tech
     # Replace PRD placeholder
     prompt = enhanced_prompt.replace("{{prd_output}}", prd_output)
     
-    # Call Mistral Large with higher temperature for creative architecture
-    print("🤖 Generating architecture design with Mistral Large 2 (creative mode)...\n")
-    output = generate_response(prompt, "mistral.mistral-large-2402-v1:0", temperature=0.8)
+    # Call GPT-OSS-20B for architecture design
+    print("🤖 Generating architecture design with GPT-OSS-20B...\n")
+    output = generate_response(prompt, "openai.gpt-oss-20b-1:0", temperature=0.8)
     
     # Save outputs
     save_output("04_architecture_design", output)

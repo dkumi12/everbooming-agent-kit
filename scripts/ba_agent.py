@@ -5,8 +5,8 @@ def run_agent(idea: str):
     prompt_template = load_prompt("ba.md")
     prompt = prompt_template.replace("{{idea}}", idea)
 
-    # CALL MISTRAL LARGE with balanced temperature
-    output = generate_response(prompt, "mistral.mistral-large-2402-v1:0", temperature=0.7)
+    # CALL GPT-OSS-20B
+    output = generate_response(prompt, "openai.gpt-oss-20b-1:0", temperature=0.7)
 
     save_output("01_business_analysis", output)
     return output
